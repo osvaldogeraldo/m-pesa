@@ -1,8 +1,8 @@
 <?php
 
-namespace Techsolutions\MPesa;
+namespace BrilliantMind\MPesa;
 
-use Techsolutions\MPesa\Contracts\TransactionContract;
+use BrilliantMind\MPesa\Contracts\TransactionContract;
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Contracts\Support\Jsonable;
 use Illuminate\Database\Eloquent\JsonEncodingException;

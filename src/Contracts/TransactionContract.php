@@ -1,6 +1,6 @@
 <?php
 
-namespace Techsolutions\MPesa\Contracts;
+namespace BrilliantMind\MPesa\Contracts;
 
 interface TransactionContract
 {

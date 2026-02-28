@@ -6,7 +6,7 @@ Este pacote permite interagir com a API do M-Pesa, facilitando transações como
 
 To install this dependency, just run the command below:
 ```shell
-composer require techsolutions/m-pesa
+composer require BrilliantMind/m-pesa
 ```
 
 ## Configuração
@@ -26,7 +26,7 @@ Antes de utilizar o SDK, você deve configurar as credenciais e parâmetros da A
 ### Exemplo de configuração:
 
 ```php
-use Techsolutions\MPesa\Config\Config;
+use BrilliantMind\MPesa\Config\Config;
 
 // Configuração da API M-Pesa
 Mpesa::config(
@@ -48,7 +48,7 @@ Mpesa::config(
 
 require _DIR_.'/vendor/autoload.php';
 
-use \Techsolutions\MPesa\Mpesa;
+use \BrilliantMind\MPesa\Mpesa;
 
 
 // Configuração da API M-Pesa
@@ -78,7 +78,7 @@ print_r($response->toArray());
 
 require _DIR_.'/vendor/autoload.php';
 
-use \Techsolutions\MPesa\Mpesa;
+use \BrilliantMind\MPesa\Mpesa;
 
 // Configuração da API M-Pesa
 Mpesa::config(
@@ -107,7 +107,7 @@ print_r($response->toArray());
 
 require _DIR_.'/vendor/autoload.php';
 
-use \Techsolutions\MPesa\Mpesa;
+use \BrilliantMind\MPesa\Mpesa;
 
 // Configuração da API M-Pesa
 Mpesa::config(
@@ -136,7 +136,7 @@ print_r($response->toArray());
 
 require _DIR_.'/vendor/autoload.php';
 
-use \Techsolutions\MPesa\Mpesa;
+use \BrilliantMind\MPesa\Mpesa;
 
 // Configuração da API M-Pesa
 Mpesa::config(
@@ -164,7 +164,7 @@ print_r($response->toArray());
 
 require _DIR_.'/vendor/autoload.php';
 
-use \Techsolutions\MPesa\Mpesa;
+use \BrilliantMind\MPesa\Mpesa;
 
 // Configuração da API M-Pesa
 Mpesa::config(

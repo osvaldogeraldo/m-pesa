@@ -1,6 +1,6 @@
 <?php
 
-namespace Techsolutions\MPesa\Contracts\Token;
+namespace BrilliantMind\MPesa\Contracts\Token;
 
 interface ParserContract
 {

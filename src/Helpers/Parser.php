@@ -1,9 +1,9 @@
 <?php
 
-namespace Techsolutions\MPesa\Helpers;
+namespace BrilliantMind\MPesa\Helpers;
 
 
-use Techsolutions\MPesa\Contracts\Token\ParserContract;
+use BrilliantMind\MPesa\Contracts\Token\ParserContract;
 
 class Parser implements ParserContract
 {

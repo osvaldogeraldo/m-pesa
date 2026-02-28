@@ -1,6 +1,6 @@
 <?php
 
-namespace Techsolutions\MPesa;
+namespace BrilliantMind\MPesa;
 
 
 abstract class Response

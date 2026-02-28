@@ -1,26 +1,33 @@
 {
-  "name": "techsolutions/m-pesa",
+  "name": "brilliant_mind/m-pesa",
   "description": "MPesa package for laravel",
   "license": "MIT",
   "keywords": [
-    "techsolutions",
-    "mpesa"
+    "brilliant_mind",
+    "mpesa",
+    "mozambique",
+    "laravel"
   ],
   "autoload": {
     "psr-4": {
-      "Techsolutions\\MPesa\\": "src/"
+      "BrilliantMind\\MPesa\\": "src/"
     }
   },
   "autoload-dev": {
     "psr-4": {
-      "Techsolutions\\MPesa\\Tests\\": "tests"
+      "BrilliantMind\\MPesa\\Tests\\": "tests/"
     }
   },
   "authors": [
     {
+      "name": "Osvaldo Manjate",
+      "email": "osvaldogeraldo34@gmail.com",
+      "role": "Maintainer"
+    },
+    {
       "name": "Paulo Maculuve",
       "email": "paulomaculuve758@gmail.com",
-      "role": "Developer"
+      "role": "Original Author"
     }
   ],
   "require": {
@@ -28,7 +35,8 @@
     "guzzlehttp/guzzle": "^7.0",
     "ext-openssl": "*",
     "ext-json": "*",
-    "ext-curl": "*"
+    "ext-curl": "*",
+    "illuminate/support": "^10.0|^11.0"
   },
   "require-dev": {
     "phpunit/phpunit": "^11.3",
@@ -37,5 +45,12 @@
   "scripts": {
     "test": "vendor/bin/phpunit",
     "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
+  },
+  "extra": {
+    "laravel": {
+      "providers": [
+        "BrilliantMind\\MPesa\\Providers\\MPesaServiceProvider"
+      ]
+    }
   }
 }

@@ -1,6 +1,6 @@
 <?php
 
-namespace Techsolutions\MPesa;
+namespace BrilliantMind\MPesa;
 
 use Illuminate\Support\Facades\Facade;
 

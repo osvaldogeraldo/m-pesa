@@ -1,8 +1,8 @@
 <?php
 
-namespace Techsolutions\MPesa\Contracts;
+namespace BrilliantMind\MPesa\Contracts;
 
-use Techsolutions\MPesa\Transaction;
+use BrilliantMind\MPesa\Transaction;
 
 interface MPesaContract
 {

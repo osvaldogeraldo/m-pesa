@@ -1,9 +1,9 @@
 <?php
 
-namespace Techsolutions\MPesa\Providers;
+namespace BrilliantMind\MPesa\Providers;
 
 use Illuminate\Support\ServiceProvider;
-use Techsolutions\MPesa\MPesa;
+use BrilliantMind\MPesa\MPesa;
 
 class MPesaServiceProvider extends ServiceProvider
 {

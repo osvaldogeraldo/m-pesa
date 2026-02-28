@@ -1,9 +1,9 @@
 <?php
 
-namespace Techsolutions\MPesa;
+namespace BrilliantMind\MPesa;
 
 use GuzzleHttp\Exception\ClientException;
-use Techsolutions\MPesa\Contracts\MPesaContract;
+use BrilliantMind\MPesa\Contracts\MPesaContract;
 use Exception;
 use GuzzleHttp\Client;
 use GuzzleHttp\Exception\GuzzleException;

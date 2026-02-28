@@ -1,6 +1,6 @@
 <?php
 
-namespace Techsolutions\MPesa\Exceptions;
+namespace BrilliantMind\MPesa\Exceptions;
 
 use Exception;
 

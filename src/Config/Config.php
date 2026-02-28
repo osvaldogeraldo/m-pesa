@@ -1,6 +1,6 @@
 <?php
 
-namespace Techsolutions\MPesa\Config;
+namespace BrilliantMind\MPesa\Config;
 
 class Config {
 

@@ -1,12 +1,12 @@
 <?php
 
-namespace Techsolutions\MPesa;
+namespace BrilliantMind\MPesa;
 
-use Techsolutions\MPesa\Contracts\FakeContract;
-use Techsolutions\MPesa\Contracts\MPesaContract;
-use Techsolutions\MPesa\Contracts\MPesaStaticContract;
-use Techsolutions\MPesa\Helpers\Parser;
-use Techsolutions\MPesa\Config\Config;
+use BrilliantMind\MPesa\Contracts\FakeContract;
+use BrilliantMind\MPesa\Contracts\MPesaContract;
+use BrilliantMind\MPesa\Contracts\MPesaStaticContract;
+use BrilliantMind\MPesa\Helpers\Parser;
+use BrilliantMind\MPesa\Config\Config;
 
 class MPesa extends Config implements MPesaStaticContract, FakeContract
 {
