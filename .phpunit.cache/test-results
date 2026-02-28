@@ -1,1 +1,1 @@
-{"version":2,"defects":{"BrilliantMind\\MPesa\\Tests\\Feature\\ServiceProviderTest::test_it_boots_the_service_provider":8},"times":{"BrilliantMind\\MPesa\\Tests\\Feature\\ServiceProviderTest::test_it_boots_the_service_provider":0.11}}
+{"version":2,"defects":{"BrilliantMind\\MPesa\\Tests\\Feature\\ServiceProviderTest::test_it_boots_the_service_provider":8},"times":{"BrilliantMind\\MPesa\\Tests\\Feature\\ServiceProviderTest::test_it_boots_the_service_provider":0.102}}
