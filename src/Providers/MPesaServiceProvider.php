@@ -2,8 +2,9 @@
 
 namespace BrilliantMind\MPesa\Providers;
 
-use Illuminate\Support\ServiceProvider;
+use BrilliantMind\MPesa\Config\Config;
 use BrilliantMind\MPesa\MPesa;
+use Illuminate\Support\ServiceProvider;
 
 class MPesaServiceProvider extends ServiceProvider
 {
@@ -21,14 +22,14 @@ class MPesaServiceProvider extends ServiceProvider
         //     ], 'config');
         // }
 
-        Config::config(j
-    env('MPESA_API_KEY'),
-    env('MPESA_PUBLIC_KEY'),
-    env('MPESA_ENV', 'development'), // development ou production
-    env('MPESA_SERVICE_PROVIDER_CODE', '171717'),
-    env('MPESA_ORIGIN', 'developer.mpesa.vm.co.mz'),
-    env('MPESA_INITIATOR_IDENTIFIER'),
-    env('MPESA_SECURITY_CREDENTIAL')
+        Config::config(
+            env('MPESA_API_KEY'),
+            env('MPESA_PUBLIC_KEY'),
+            env('MPESA_ENV', 'development'), // development ou production
+            env('MPESA_SERVICE_PROVIDER_CODE', '171717'),
+            env('MPESA_ORIGIN', 'developer.mpesa.vm.co.mz'),
+            env('MPESA_INITIATOR_IDENTIFIER'),
+            env('MPESA_SECURITY_CREDENTIAL')
 );
 
         $this->publishes([
