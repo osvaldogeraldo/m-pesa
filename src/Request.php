@@ -44,13 +44,19 @@ class Request implements MPesaContract
      */
     protected string $securityCredential;
 
+    /**
+     * @var string $portOverride
+     */
+    protected string $portOverride;
+
     public function __construct(
         string $host,
         string $origin,
         string $token,
         string $serviceProviderCode,
         string $initiatorIdentifier,
-        string $securityCredential)
+        string $securityCredential,
+        string $portOverride = '')
     {
         $this->host = $host;
         $this->origin = $origin;
@@ -58,6 +64,7 @@ class Request implements MPesaContract
         $this->serviceProviderCode = $serviceProviderCode;
         $this->initiatorIdentifier = $initiatorIdentifier;
         $this->securityCredential = $securityCredential;
+        $this->portOverride = $portOverride;
     }
 
     /**
@@ -251,7 +258,8 @@ class Request implements MPesaContract
      */
     protected function request(string $port = ''): Client
     {
-        return new Client(['base_uri' => 'https://' . $this->host . ':' . $port]);
+        $effectivePort = !empty($this->portOverride) ? $this->portOverride : $port;
+        return new Client(['base_uri' => 'https://' . $this->host . ':' . $effectivePort]);
     }
 
     /**

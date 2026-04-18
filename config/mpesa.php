@@ -8,4 +8,6 @@ return [
     'origin' => env('MPESA_ORIGIN', 'developer.mpesa.vm.co.mz'),
     'initiatorIdentifier' => env('MPESA_INITIATOR_IDENTIFIER', ''),
     'securityCredential' => env('MPESA_SECURITY_CREDENTIAL', ''),
+    'host' => env('MPESA_HOST', ''),
+    'port' => env('MPESA_PORT', ''),
 ];

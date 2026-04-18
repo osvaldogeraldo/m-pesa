@@ -23,14 +23,16 @@ class MPesaServiceProvider extends ServiceProvider
         // }
 
         Config::config(
-            env('MPESA_API_KEY'),
-            env('MPESA_PUBLIC_KEY'),
-            env('MPESA_ENV', 'development'), // development ou production
-            env('MPESA_SERVICE_PROVIDER_CODE', '171717'),
-            env('MPESA_ORIGIN', 'developer.mpesa.vm.co.mz'),
-            env('MPESA_INITIATOR_IDENTIFIER'),
-            env('MPESA_SECURITY_CREDENTIAL')
-);
+            config('mpesa.api_key'),
+            config('mpesa.public_key'),
+            config('mpesa.environment', 'development'), // development ou production
+            config('mpesa.service_provider_code', '171717'),
+            config('mpesa.origin', 'developer.mpesa.vm.co.mz'),
+            config('mpesa.initiatorIdentifier', ''),
+            config('mpesa.securityCredential', ''),
+            config('mpesa.host', ''),
+            config('mpesa.port', '')
+        );
 
         $this->publishes([
             __DIR__.'/../../config/mpesa.php' => config_path('mpesa.php'),

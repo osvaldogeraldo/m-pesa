@@ -47,9 +47,12 @@ class Config {
 
     private static string $securityCredential;
 
-    public static function config( string $api_key, string $public_key, string $environment = null, string $service_provider_code = null, string $origin = null, string $initiatorIdentifier = null, string $securityCredential = null ) {
+    private static string $port = '';
+
+    public static function config( string $api_key, string $public_key, string $environment = null, string $service_provider_code = null, string $origin = null, string $initiatorIdentifier = null, string $securityCredential = null, string $host = null, string $port = null ) {
         self::$environment = $environment ?? self::$environment;
-        self::$host =  self::$environment == 'development' ? self::$hostDeveloper : self::$hostProduction;
+        self::$host = !empty($host) ? $host : (self::$environment == 'development' ? self::$hostDeveloper : self::$hostProduction);
+        self::$port = $port ?? self::$port;
         self::$origin = $origin ?? self::$origin;
         self::$api_key = $api_key;
         self::$public_key = $public_key;
@@ -105,8 +108,13 @@ class Config {
         return self::$initiatorIdentifier;
     }
 
-    public static function getSecurityCredential(): string 
+    public static function getSecurityCredential(): string
     {
         return self::$securityCredential;
+    }
+
+    public static function getPort(): string
+    {
+        return self::$port;
     }
 }
