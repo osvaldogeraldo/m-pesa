@@ -6,7 +6,8 @@
       "Bash(php -l src/MPesa.php)",
       "Bash(php teste.php)",
       "Bash(php -r \"require 'vendor/autoload.php'; echo class_exists\\('Illuminate\\\\Contracts\\\\Support\\\\Arrayable'\\) ? 'Arrayable OK' : 'Arrayable MISSING'; echo PHP_EOL;\")",
-      "Bash(php -r \"require 'vendor/autoload.php'; echo class_exists\\('Illuminate\\\\Contracts\\\\Support\\\\Arrayable'\\) ? 'Arrayable OK' : 'Arrayable MISSING'; echo PHP_EOL; echo class_exists\\('Illuminate\\\\Database\\\\Eloquent\\\\JsonEncodingException'\\) ? 'JsonEncodingException OK' : 'JsonEncodingException MISSING'; echo PHP_EOL;\")"
+      "Bash(php -r \"require 'vendor/autoload.php'; echo class_exists\\('Illuminate\\\\Contracts\\\\Support\\\\Arrayable'\\) ? 'Arrayable OK' : 'Arrayable MISSING'; echo PHP_EOL; echo class_exists\\('Illuminate\\\\Database\\\\Eloquent\\\\JsonEncodingException'\\) ? 'JsonEncodingException OK' : 'JsonEncodingException MISSING'; echo PHP_EOL;\")",
+      "Bash(php -r 'require \"vendor/autoload.php\"; echo interface_exists\\(\"Illuminate\\\\\\\\Contracts\\\\\\\\Support\\\\\\\\Arrayable\"\\) ? \"Arrayable OK\\\\n\" : \"Arrayable MISSING\\\\n\"; $tx = new BrilliantMind\\\\MPesa\\\\Transaction\\([\"output_ResponseCode\" => \"INS-0\", \"output_ResponseDesc\" => \"OK\", \"output_TransactionID\" => \"T1\", \"output_ConversationID\" => \"C1\", \"output_ThirdPartyReference\" => \"P1\"]\\); echo \"Transaction instantiated: \" . $tx->getMessage\\(\\) . \"\\\\n\";')"
     ]
   }
 }
