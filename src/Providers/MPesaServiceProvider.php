@@ -23,7 +23,8 @@ class MPesaServiceProvider extends ServiceProvider
             (string) config('mpesa.service_provider_code', '171717'),
             (string) config('mpesa.origin', 'developer.mpesa.vm.co.mz'),
             (string) config('mpesa.initiator_identifier', ''),
-            (string) config('mpesa.security_credential', '')
+            (string) config('mpesa.security_credential', ''),
+            (string) config('mpesa.host', '')
         );
     }
 

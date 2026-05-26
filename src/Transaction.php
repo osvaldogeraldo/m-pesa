@@ -86,7 +86,12 @@ class Transaction implements TransactionContract, Arrayable, Jsonable, JsonSeria
 
     public function getMessage(): string
     {
-        return Response::$codes[$this->attributes['output_ResponseCode']]['code'];
+        return (string) Response::describe($this->attributes['output_ResponseCode'] ?? null)['message'];
+    }
+
+    public function getStatusCode(): int
+    {
+        return (int) Response::describe($this->attributes['output_ResponseCode'] ?? null)['code'];
     }
 
     /**

@@ -31,10 +31,13 @@ class Config
         ?string $service_provider_code = null,
         ?string $origin = null,
         ?string $initiatorIdentifier = null,
-        ?string $securityCredential = null
+        ?string $securityCredential = null,
+        ?string $host = null
     ): void {
         self::$environment = $environment ?: self::$environment;
-        self::$host = self::$environment === 'production' ? self::$hostProduction : self::$hostDeveloper;
+        self::$host = $host !== null && $host !== ''
+            ? $host
+            : (self::$environment === 'production' ? self::$hostProduction : self::$hostDeveloper);
         self::$origin = $origin ?: self::$origin;
         self::$api_key = $api_key;
         self::$public_key = $public_key;

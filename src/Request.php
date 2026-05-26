@@ -2,46 +2,20 @@
 
 namespace BrilliantMind\MPesa;
 
-use GuzzleHttp\Exception\ClientException;
 use BrilliantMind\MPesa\Contracts\MPesaContract;
-use Exception;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\BadResponseException;
 use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Handler\MockHandler;
-use GuzzleHttp\HandlerStack;
-use GuzzleHttp\Psr7\Response;
+use Psr\Http\Message\ResponseInterface;
 use Psr\Http\Message\StreamInterface;
 
 class Request implements MPesaContract
 {
-    /**
-     * @var string $host
-     */
     protected string $host;
-
-    /**
-     * @var string $origin
-     */
     protected string $origin;
-
-    /**
-     * @var string
-     */
     protected string $token;
-
-    /**
-     * @var string $serviceProviderCode
-     */
     protected string $serviceProviderCode;
-
-    /**
-     * @var string $initiatorIdentifier
-     */
     protected string $initiatorIdentifier;
-
-    /**
-     * @var string $securityCredential
-     */
     protected string $securityCredential;
 
     public function __construct(
@@ -50,8 +24,8 @@ class Request implements MPesaContract
         string $token,
         string $serviceProviderCode,
         string $initiatorIdentifier,
-        string $securityCredential)
-    {
+        string $securityCredential
+    ) {
         $this->host = $host;
         $this->origin = $origin;
         $this->token = $token;
@@ -61,207 +35,145 @@ class Request implements MPesaContract
     }
 
     /**
-     * Initiates a customer to business (c2b) transaction on the M-Pesa API.
+     * Initiates a customer to business (C2B) transaction on the M-Pesa API.
      *
-     * @param float $amount
-     * @param string $msisdn
-     * @param string $transactionReference
-     * @param $thirdPartyReference
-     * @return Transaction
-     * @throws Exception|GuzzleException
+     * @throws GuzzleException
      */
-    public function c2b(float $amount, string $msisdn, string $transactionReference, $thirdPartyReference): Transaction
+    public function c2b(float $amount, string $msisdn, string $transactionReference, string $thirdPartyReference): Transaction
     {
         $data = [
-            "input_TransactionReference" => $transactionReference,
-            "input_CustomerMSISDN" => $msisdn,
-            "input_Amount" => $amount,
-            "input_ThirdPartyReference" => $thirdPartyReference,
-            "input_ServiceProviderCode" => $this->serviceProviderCode
+            'input_TransactionReference' => $transactionReference,
+            'input_CustomerMSISDN'       => $msisdn,
+            'input_Amount'               => $amount,
+            'input_ThirdPartyReference'  => $thirdPartyReference,
+            'input_ServiceProviderCode'  => $this->serviceProviderCode,
         ];
 
-        $client = $this->request('18352', $data);
-
-        $request = new \GuzzleHttp\Psr7\Request('POST', '/ipg/v1x/c2bPayment/singleStage/', [
-            'Content-Type' => 'application/json',
-            'origin' => $this->origin,
-            'Authorization' => 'Bearer ' . $this->token,
-        ], json_encode($data));
-
-        try {
-            $response = $client->send($request);
-        } catch (ClientException $e) {
-            $response = $e->getResponse();
-        }
-
-        return new Transaction($this->streamToArray($response->getBody()));
+        return $this->send('POST', '18352', '/ipg/v1x/c2bPayment/singleStage/', $data);
     }
 
     /**
-     * Initiates a customer to business (b2b) transaction on the M-Pesa API.
+     * Initiates a business to business (B2B) transaction on the M-Pesa API.
      *
-     * @param float $amount
-     * @param string $msisdn
-     * @param string $transactionReference
-     * @param $thirdPartyReference
-     * @return Transaction
-     * @throws Exception|GuzzleException
+     * @throws GuzzleException
      */
-    public function b2b(float $amount, string $msisdn, string $transactionReference, $thirdPartyReference): Transaction
+    public function b2b(float $amount, string $msisdn, string $transactionReference, string $thirdPartyReference): Transaction
     {
         $data = [
-            "input_TransactionReference" => $transactionReference,
-            "input_CustomerMSISDN" => $msisdn,
-            "input_Amount" => $amount,
-            "input_ThirdPartyReference" => $thirdPartyReference,
-            "input_ServiceProviderCode" => $this->serviceProviderCode
+            'input_TransactionReference' => $transactionReference,
+            'input_CustomerMSISDN'       => $msisdn,
+            'input_Amount'               => $amount,
+            'input_ThirdPartyReference'  => $thirdPartyReference,
+            'input_ServiceProviderCode'  => $this->serviceProviderCode,
         ];
 
-        $client = $this->request('18349', $data);
-
-        $request = new \GuzzleHttp\Psr7\Request('POST', '/ipg/v1x/b2bPayment/', [
-            'Content-Type' => 'application/json',
-            'origin' => $this->origin,
-            'Authorization' => 'Bearer ' . $this->token,
-        ], json_encode($data));
-
-        try {
-            $response = $client->send($request);
-        } catch (ClientException $e) {
-            $response = $e->getResponse();
-        }
-
-        return new Transaction($this->streamToArray($response->getBody()));
+        return $this->send('POST', '18349', '/ipg/v1x/b2bPayment/', $data);
     }
 
     /**
-     * Initiates a business to business (b2c) transaction on the M-Pesa API.
+     * Initiates a business to customer (B2C) transaction on the M-Pesa API.
      *
-     * @param float $amount
-     * @param string $msisdn
-     * @param string $transactionReference
-     * @param $thirdPartyReference
-     * @return Transaction
-     * @throws Exception|GuzzleException
+     * @throws GuzzleException
      */
-    public function b2c(float $amount, string $msisdn, string $transactionReference, $thirdPartyReference): Transaction
+    public function b2c(float $amount, string $msisdn, string $transactionReference, string $thirdPartyReference): Transaction
     {
         $data = [
-            "input_TransactionReference" => $transactionReference,
-            "input_CustomerMSISDN" => $msisdn,
-            "input_Amount" => $amount,
-            "input_ThirdPartyReference" => $thirdPartyReference,
-            "input_ServiceProviderCode" => $this->serviceProviderCode
+            'input_TransactionReference' => $transactionReference,
+            'input_CustomerMSISDN'       => $msisdn,
+            'input_Amount'               => $amount,
+            'input_ThirdPartyReference'  => $thirdPartyReference,
+            'input_ServiceProviderCode'  => $this->serviceProviderCode,
         ];
 
-        $client = $this->request('18345', $data);
-
-        $request = new \GuzzleHttp\Psr7\Request('POST', '/ipg/v1x/b2cPayment/', [
-            'Content-Type' => 'application/json',
-            'origin' => $this->origin,
-            'Authorization' => 'Bearer ' . $this->token,
-        ], json_encode($data));
-
-        try {
-            $response = $client->send($request);
-        } catch (ClientException $e) {
-            $response = $e->getResponse();
-        }
-
-        return new Transaction($this->streamToArray($response->getBody()));
+        return $this->send('POST', '18345', '/ipg/v1x/b2cPayment/', $data);
     }
 
     /**
      * Initiates a reversal transaction on the M-Pesa API.
      *
-     * @param float $amount
-     * @param string $transactionID
-     * @param string $thirdPartyReference
-     * @return Transaction
-     * @throws Exception|GuzzleException
+     * @throws GuzzleException
      */
     public function reversal(float $amount, string $transactionID, string $thirdPartyReference): Transaction
     {
         $data = [
-            'input_Amount' => $amount,
-            'input_TransactionID' => $transactionID,
+            'input_Amount'              => $amount,
+            'input_TransactionID'       => $transactionID,
             'input_ThirdPartyReference' => $thirdPartyReference,
             'input_ServiceProviderCode' => $this->serviceProviderCode,
             'input_InitiatorIdentifier' => $this->initiatorIdentifier,
-            'input_SecurityCredential' => $this->securityCredential,
+            'input_SecurityCredential'  => $this->securityCredential,
         ];
 
-        $client = $this->request('18354', $data);
-
-        $request = new \GuzzleHttp\Psr7\Request('PUT', '/ipg/v1x/reversal/', [
-            'Content-Type' => 'application/json',
-            'origin' => $this->origin,
-            'Authorization' => 'Bearer ' . $this->token,
-        ], json_encode($data));
-
-        try {
-            $response = $client->send($request);
-        } catch (ClientException $e) {
-            $response = $e->getResponse();
-        }
-
-        return new Transaction($this->streamToArray($response->getBody()));
+        return $this->send('PUT', '18354', '/ipg/v1x/reversal/', $data);
     }
 
     /**
-     * Get transaction in M-Pesa API.
+     * Query a transaction in the M-Pesa API.
      *
-     * @param string $transactionReference
-     * @param string $thirdPartyReference
-     * @return Transaction
-     * @throws Exception|GuzzleException
+     * @throws GuzzleException
      */
     public function transaction(string $transactionReference, string $thirdPartyReference): Transaction
     {
         $data = [
-            "input_QueryReference" => $transactionReference,
-            "input_ThirdPartyReference" => $thirdPartyReference,
-            "input_ServiceProviderCode" => $this->serviceProviderCode,
+            'input_QueryReference'      => $transactionReference,
+            'input_ThirdPartyReference' => $thirdPartyReference,
+            'input_ServiceProviderCode' => $this->serviceProviderCode,
         ];
 
-        $client = $this->request('18353', $data);
-
-        $request = new \GuzzleHttp\Psr7\Request('GET', '/ipg/v1x/queryTransactionStatus/?' . http_build_query($data), [
-            'Content-Type' => 'application/json',
-            'origin' => $this->origin,
-            'Authorization' => 'Bearer ' . $this->token
-        ]);
-
-        try {
-            $response = $client->send($request);
-        } catch (ClientException $e) {
-            $response = $e->getResponse();
-        }
-
-        return new Transaction($this->streamToArray($response->getBody()));
+        return $this->send('GET', '18353', '/ipg/v1x/queryTransactionStatus/?' . http_build_query($data), $data, false);
     }
 
     /**
-     * Check if development request of testing.
-     *
-     * @param string $port
-     * @param array $body
-     * @return Client
-     * @throws Exception
+     * Build the Guzzle client for the given port.
      */
-    protected function request(string $port = ''): Client
+    protected function client(string $port): Client
     {
         return new Client(['base_uri' => 'https://' . $this->host . ':' . $port]);
     }
 
     /**
-     * Convert guzzle stream to array.
+     * Dispatch a request to M-Pesa and wrap the body in a Transaction.
      *
-     * @param StreamInterface $stream
-     * @return array
+     * @param array<string, mixed> $data
+     *
+     * @throws GuzzleException
      */
-    protected function streamToArray(StreamInterface $stream): array
+    protected function send(string $method, string $port, string $uri, array $data, bool $withBody = true): Transaction
     {
-        return json_decode((string)$stream, true);
+        $headers = [
+            'Content-Type'  => 'application/json',
+            'Origin'        => $this->origin,
+            'Authorization' => 'Bearer ' . $this->token,
+        ];
+
+        $body = $withBody ? json_encode($data) : null;
+        $request = new \GuzzleHttp\Psr7\Request($method, $uri, $headers, $body);
+
+        try {
+            $response = $this->client($port)->send($request);
+        } catch (BadResponseException $e) {
+            $response = $e->getResponse();
+        }
+
+        return new Transaction($this->streamToArray($response));
+    }
+
+    /**
+     * Convert a Guzzle response body into an array.
+     */
+    protected function streamToArray(?ResponseInterface $response): array
+    {
+        if ($response === null) {
+            return [];
+        }
+
+        return $this->decode($response->getBody());
+    }
+
+    protected function decode(StreamInterface $stream): array
+    {
+        $decoded = json_decode((string) $stream, true);
+
+        return is_array($decoded) ? $decoded : [];
     }
 }

@@ -1,0 +1,12 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(php -r ' *)",
+      "Bash(php -l teste.php)",
+      "Bash(php -l src/MPesa.php)",
+      "Bash(php teste.php)",
+      "Bash(php -r \"require 'vendor/autoload.php'; echo class_exists\\('Illuminate\\\\Contracts\\\\Support\\\\Arrayable'\\) ? 'Arrayable OK' : 'Arrayable MISSING'; echo PHP_EOL;\")",
+      "Bash(php -r \"require 'vendor/autoload.php'; echo class_exists\\('Illuminate\\\\Contracts\\\\Support\\\\Arrayable'\\) ? 'Arrayable OK' : 'Arrayable MISSING'; echo PHP_EOL; echo class_exists\\('Illuminate\\\\Database\\\\Eloquent\\\\JsonEncodingException'\\) ? 'JsonEncodingException OK' : 'JsonEncodingException MISSING'; echo PHP_EOL;\")"
+    ]
+  }
+}

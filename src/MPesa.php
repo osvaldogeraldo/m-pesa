@@ -2,130 +2,104 @@
 
 namespace BrilliantMind\MPesa;
 
+use BrilliantMind\MPesa\Config\Config;
 use BrilliantMind\MPesa\Contracts\FakeContract;
 use BrilliantMind\MPesa\Contracts\MPesaContract;
-use BrilliantMind\MPesa\Contracts\MPesaStaticContract;
 use BrilliantMind\MPesa\Helpers\Parser;
-use BrilliantMind\MPesa\Config\Config;
 
-class MPesa extends Config implements MPesaStaticContract, FakeContract
+class MPesa implements FakeContract
 {
-    /**
-     * @var bool $test
-     */
-    protected static bool $fake = false;
+    protected bool $fake = false;
 
-    /**
-     * @var string
-     */
-    protected static string $status = "";
+    protected string $fakeStatus = '';
 
-    /**
-     * @var int
-     */
-    protected static int $responseCode = 200;
+    protected int $fakeResponseCode = 200;
 
-    /**
-     * @param int $responseCode
-     * @param string $status
-     */
-    public static function fake(int $responseCode = 200, string $status = ""): void
+    public function fake(int $responseCode = 200, string $status = ''): void
     {
-        self::$fake = true;
-        self::$status = $status;
-        self::$responseCode = $responseCode;
+        $this->fake = true;
+        $this->fakeResponseCode = $responseCode;
+        $this->fakeStatus = $status;
+    }
+
+    public function setStatus(string $status): void
+    {
+        $this->fakeStatus = $status;
+    }
+
+    public function setResponseCode(int $code): void
+    {
+        $this->fakeResponseCode = $code;
     }
 
     /**
-     * @param string $status
-     */
-    public static function setStatus(string $status): void
-    {
-        self::$status = $status;
-    }
-
-    /**
-     * @param int $code
-     */
-    public static function setResponseCode(int $code): void
-    {
-        self::$responseCode = $code;
-    }
-    /**
-     * Initiates a customer to business (c2b) transaction on the M-Pesa API.
+     * Configurar credenciais em runtime (útil em cenários multi-tenant).
      *
-     * @param float $amount
-     * @param string $msisdn
-     * @param string $transactionReference
-     * @param string $thirdPartyReference
-     * @return mixed
+     * Equivale a chamar Config::config(...) directamente. A facade `Mpesa::config(...)`
+     * resolve para este método através do singleton registado pelo ServiceProvider.
      */
-    public static function c2b(float $amount, string $msisdn, string $transactionReference, string $thirdPartyReference): Transaction
-    {
-        return (new static())->mPesa()->c2b($amount, $msisdn, $transactionReference, $thirdPartyReference);
+    public static function config(
+        string $apiKey,
+        string $publicKey,
+        ?string $environment = null,
+        ?string $serviceProviderCode = null,
+        ?string $origin = null,
+        ?string $initiatorIdentifier = null,
+        ?string $securityCredential = null,
+        ?string $host = null
+    ): void {
+        Config::config(
+            $apiKey,
+            $publicKey,
+            $environment,
+            $serviceProviderCode,
+            $origin,
+            $initiatorIdentifier,
+            $securityCredential,
+            $host
+        );
     }
 
-    /**
-     * Initiates a customer to business (b2b) transaction on the M-Pesa API.
-     *
-     * @param float $amount
-     * @param string $msisdn
-     * @param string $transactionReference
-     * @param $thirdPartyReference
-     * @return mixed
-     */
-    public static function b2b(float $amount, string $msisdn, string $transactionReference, $thirdPartyReference): Transaction
+    public function c2b(float $amount, string $msisdn, string $transactionReference, string $thirdPartyReference): Transaction
     {
-        return (new static())->mPesa()->b2b($amount, $msisdn, $transactionReference, $thirdPartyReference);;
+        return $this->client()->c2b($amount, $msisdn, $transactionReference, $thirdPartyReference);
     }
 
-    /**
-     * Initiates a business to business (b2c) transaction on the M-Pesa API.
-     *
-     * @param float $amount
-     * @param string $msisdn
-     * @param string $transactionReference
-     * @param $thirdPartyReference
-     * @return mixed
-     */
-    public static function b2c(float $amount, string $msisdn, string $transactionReference, $thirdPartyReference): Transaction
+    public function b2b(float $amount, string $msisdn, string $transactionReference, string $thirdPartyReference): Transaction
     {
-        return (new static())->mPesa()->b2c($amount, $msisdn, $transactionReference, $thirdPartyReference);
+        return $this->client()->b2b($amount, $msisdn, $transactionReference, $thirdPartyReference);
     }
 
-    /**
-     * Get transaction in M-Pesa API.
-     *
-     * @param string $transactionReference
-     * @param string $thirdPartyReference
-     * @return Transaction
-     */
-    public static function transaction(string $transactionReference, string $thirdPartyReference): Transaction
+    public function b2c(float $amount, string $msisdn, string $transactionReference, string $thirdPartyReference): Transaction
     {
-        return (new static())->mPesa()->transaction($transactionReference, $thirdPartyReference);
+        return $this->client()->b2c($amount, $msisdn, $transactionReference, $thirdPartyReference);
     }
 
-
-    /**
-     * Initiates a reversal transaction on the M-Pesa API.
-     *
-     * @param float $amount
-     * @param string $transactionID
-     * @param string $thirdPartyReference
-     * @return mixed
-     */
-    public static function reversal(float $amount, string $transactionID, string $thirdPartyReference): Transaction
+    public function transaction(string $transactionReference, string $thirdPartyReference): Transaction
     {
-        return (new static())->mPesa()->reversal($amount, $transactionID, $thirdPartyReference);
+        return $this->client()->transaction($transactionReference, $thirdPartyReference);
     }
 
-    /**
-     * @return MPesaContract
-     */
-    protected function mPesa()
+    public function reversal(float $amount, string $transactionID, string $thirdPartyReference): Transaction
     {
-        $token = Parser::parse(self::getApiKey(), self::getPublicKey());
-        $request = new Request(self::getHost(), self::getOrigin(), $token, self::getServiceProviderCode(), self::getInitiatorIdentifier(), self::getSecurityCredential());
-        return $request;
+        return $this->client()->reversal($amount, $transactionID, $thirdPartyReference);
+    }
+
+    protected function client(): MPesaContract
+    {
+        if ($this->fake) {
+            return new FakeRequest($this->fakeResponseCode, $this->fakeStatus);
+        }
+
+        $token = Parser::parse(Config::getApiKey(), Config::getPublicKey());
+
+        return new Request(
+            Config::getHost(),
+            Config::getOrigin(),
+            $token,
+            Config::getServiceProviderCode(),
+            Config::getInitiatorIdentifier(),
+            Config::getSecurityCredential()
+        );
     }
 }
