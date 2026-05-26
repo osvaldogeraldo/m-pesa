@@ -50,7 +50,10 @@
     "laravel": {
       "providers": [
         "BrilliantMind\\MPesa\\Providers\\MPesaServiceProvider"
-      ]
+      ],
+      "aliases": {
+        "Mpesa": "BrilliantMind\\MPesa\\Facades\\MPesaFacade"
+      }
     }
   }
 }

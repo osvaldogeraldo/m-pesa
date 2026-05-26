@@ -1,190 +1,98 @@
-# M-Pesa PHP SDK
+# M-Pesa PHP SDK (Laravel)
 
-Este pacote permite interagir com a API do M-Pesa, facilitando transações como C2B, B2B, B2C, e consultas de transações. Ele também oferece suporte para transações de reversão.
+SDK para interagir com a API M-Pesa Moçambique: C2B, B2B, B2C, consulta de transação e reversão.
 
-## Installation
+## Instalação
 
-To install this dependency, just run the command below:
 ```shell
-composer require BrilliantMind/m-pesa
+composer require brilliant_mind/m-pesa
 ```
+
+O pacote usa _package auto-discovery_ — o `ServiceProvider` e o alias `Mpesa` são registados automaticamente.
 
 ## Configuração
 
-Antes de utilizar o SDK, você deve configurar as credenciais e parâmetros da API do M-Pesa. O pacote permite que você defina as seguintes variáveis:
+### 1. Variáveis de ambiente (`.env`)
 
-- **`api_key`** — Sua chave de API fornecida pela M-Pesa.
-- **`public_key`** — Chave pública utilizada para encriptação das requisições.
-- **`environment`** — O ambiente de execução da API, que pode ser:
-  - `'development'` para o ambiente de desenvolvimento (sandbox).
-  - `'production'` para o ambiente de produção.
-- **`service_provider_code`** — Código do provedor de serviço. O valor padrão é `'171717'`.
-- **`origin`** — Origem da aplicação, usada para validar as requisições. Por padrão ja foi defenido `'developer.mpesa.vm.co.mz'`
-- **`initiatorIdentifier`** — Identificador do iniciador, que autoriza as transações.
-- **`securityCredential`** — Credencial de segurança encriptada, utilizada para verificar a identidade do iniciador.
+#### Desenvolvimento (sandbox)
 
-### Exemplo de configuração:
-
-```php
-use BrilliantMind\MPesa\Config\Config;
-
-// Configuração da API M-Pesa
-Mpesa::config(
-    api_key: 'your-api-key',
-    public_key: 'your-public-key',
-    environment: 'development', // ou 'production'
-    service_provider_code: '171717',
-    origin: 'developer.mpesa.vm.co.mz',
-    initiatorIdentifier: 'your-initiator-id',
-    securityCredential: 'your-security-credential'
-);
+```dotenv
+MPESA_ENV=development
+MPESA_API_KEY=sua_api_key_sandbox
+MPESA_PUBLIC_KEY=sua_public_key_sandbox
+MPESA_SERVICE_PROVIDER_CODE=171717
+MPESA_INITIATOR_IDENTIFIER=
+MPESA_SECURITY_CREDENTIAL=
 ```
 
-### C2B
-- A Chamada API C2B é utilizada como uma transação normal entre clientes e empresas. Os fundos da carteira de dinheiro móvel do cliente serão deduzidos e transferidos para a carteira de dinheiro móvel da empresa. Para autenticar e autorizar esta transação, a M-Pesa Payments Gateway iniciará uma mensagem USSD Push para o cliente para recolher e verificar o número PIN do dinheiro móvel. Este número não é armazenado e é utilizado apenas para autorizar a transação.
+#### Produção
 
-```php
-<?php
-
-require _DIR_.'/vendor/autoload.php';
-
-use \BrilliantMind\MPesa\Mpesa;
-
-
-// Configuração da API M-Pesa
-Mpesa::config(
-    api_key: 'your-api-key',
-    public_key: 'your-public-key',
-    environment: 'environment', // development ou 'production'
-    service_provider_code: 'service-provider',
-    origin: 'origin',
-    initiatorIdentifier: 'your-initiator-id',
-    securityCredential: 'your-security-credential'
-);
-
-$transactionReference = bin2hex(random_bytes(6)); 
-$thirdPartyReference = bin2hex(random_bytes(6));
-$response = Mpesa::c2b(1, '258846568447', $transactionReference, $thirdPartyReference);
-
-echo '<pre>';
-print_r($response->toArray());
+```dotenv
+MPESA_ENV=production
+MPESA_API_KEY=sua_api_key_producao
+MPESA_PUBLIC_KEY=sua_public_key_producao
+MPESA_SERVICE_PROVIDER_CODE=seu_codigo
+MPESA_INITIATOR_IDENTIFIER=seu_initiator
+MPESA_SECURITY_CREDENTIAL=seu_credential_encriptado
 ```
 
-### B2C
-- A Chamada API B2C é utilizada como uma transação normal entre empresas e clientes. Os fundos da carteira de dinheiro móvel da empresa serão deduzidos e transferidos para a carteira de dinheiro móvel do cliente terceiro.
+### 2. (Opcional) Publicar o ficheiro de configuração
 
-```php
-<?php
+Só é necessário se quiser alterar valores além do `.env`:
 
-require _DIR_.'/vendor/autoload.php';
-
-use \BrilliantMind\MPesa\Mpesa;
-
-// Configuração da API M-Pesa
-Mpesa::config(
-    api_key: 'your-api-key',
-    public_key: 'your-public-key',
-    environment: 'environment', // development ou 'production'
-    service_provider_code: 'service-provider',
-    origin: 'origin',
-    initiatorIdentifier: 'your-initiator-id',
-    securityCredential: 'your-security-credential'
-);
-
-$transactionReference = bin2hex(random_bytes(6)); 
-$thirdPartyReference = bin2hex(random_bytes(6));
-$response = Mpesa::b2c(1, '258846568447', $transactionReference, $thirdPartyReference);
-
-echo '<pre>';
-print_r($response->toArray());
+```shell
+php artisan vendor:publish --tag=mpesa-config
 ```
 
-### B2B
-- A Chamada API B2B é utilizada como uma transação normal entre empresas. Os fundos da carteira de dinheiro móvel da empresa serão deduzidos e transferidos para a carteira de dinheiro móvel da empresa terceira.
+Isto cria `config/mpesa.php`.
+
+## Utilização
+
+Basta usar o facade `Mpesa` em qualquer lado (controllers, jobs, services):
 
 ```php
-<?php
+use Mpesa;
 
-require _DIR_.'/vendor/autoload.php';
+$transactionReference = bin2hex(random_bytes(6));
+$thirdPartyReference  = bin2hex(random_bytes(6));
 
-use \BrilliantMind\MPesa\Mpesa;
+$response = Mpesa::c2b(1, '258846000000', $transactionReference, $thirdPartyReference);
 
-// Configuração da API M-Pesa
-Mpesa::config(
-    api_key: 'your-api-key',
-    public_key: 'your-public-key',
-    environment: 'environment', // development ou 'production'
-    service_provider_code: 'service-provider',
-    origin: 'origin',
-    initiatorIdentifier: 'your-initiator-id',
-    securityCredential: 'your-security-credential'
-);
-
-$transactionReference = bin2hex(random_bytes(6)); 
-$thirdPartyReference = bin2hex(random_bytes(6));
-$response = Mpesa::b2b(1, '258846568447', $transactionReference, $thirdPartyReference);
-
-echo '<pre>';
-print_r($response->toArray());
+return $response->toArray();
 ```
 
-### Transaction
-- A API Consultar estado da transação é utilizada para determinar o estado atual de uma determinada transação. Utilizando a ID da transação ou a ID da conversação da transação da plataforma de dinheiro móvel, o gateway de pagamentos M-Pesa devolverá informações sobre o estado da transação.
+### C2B — Cliente para Empresa
 
 ```php
-<?php
+$response = Mpesa::c2b($amount, $msisdn, $transactionReference, $thirdPartyReference);
+```
 
-require _DIR_.'/vendor/autoload.php';
+### B2C — Empresa para Cliente
 
-use \BrilliantMind\MPesa\Mpesa;
+```php
+$response = Mpesa::b2c($amount, $msisdn, $transactionReference, $thirdPartyReference);
+```
 
-// Configuração da API M-Pesa
-Mpesa::config(
-    api_key: 'your-api-key',
-    public_key: 'your-public-key',
-    environment: 'environment', // development ou 'production'
-    service_provider_code: 'service-provider',
-    origin: 'origin',
-    initiatorIdentifier: 'your-initiator-id',
-    securityCredential: 'your-security-credential'
-);
+### B2B — Empresa para Empresa
 
-$transactionReference = bin2hex(random_bytes(6)); 
-$thirdPartyReference = bin2hex(random_bytes(6));
+```php
+$response = Mpesa::b2b($amount, $msisdn, $transactionReference, $thirdPartyReference);
+```
+
+### Consulta de transação
+
+```php
 $response = Mpesa::transaction($transactionReference, $thirdPartyReference);
-
-echo '<pre>';
-print_r($response->toArray());
 ```
 
-### Reversal
-- A API de reversão é utilizada para reverter uma transação bem sucedida. Utilizando o ID da transação de uma transação anterior bem sucedida, o Portal de Pagamentos M-Pesa retira os fundos da carteira de dinheiro móvel do destinatário e reverte os fundos para a carteira de dinheiro móvel da parte que iniciou a transação original.
+### Reversão
+
 ```php
-<?php
-
-require _DIR_.'/vendor/autoload.php';
-
-use \BrilliantMind\MPesa\Mpesa;
-
-// Configuração da API M-Pesa
-Mpesa::config(
-    api_key: 'your-api-key',
-    public_key: 'your-public-key',
-    environment: 'environment', // development ou 'production'
-    service_provider_code: 'service-provider',
-    origin: 'origin',
-    initiatorIdentifier: 'your-initiator-id',
-    securityCredential: 'your-security-credential'
-);
-
-$transactionReference = bin2hex(random_bytes(6)); 
-$thirdPartyReference = bin2hex(random_bytes(6));
-$response = Mpesa::reversal(1, $transactionReference, $thirdPartyReference);
-
-echo '<pre>';
-print_r($response->toArray());
+$response = Mpesa::reversal($amount, $transactionID, $thirdPartyReference);
 ```
-
 
 ## Requisitos
-- **`PHP ^8.1`**
+
+- PHP `^8.1`
+- Laravel 10, 11 ou 12
+- Extensões: `openssl`, `json`, `curl`
