@@ -26,10 +26,11 @@ return [
     |--------------------------------------------------------------------------
     |
     | "development" talks to api.sandbox.vm.co.mz, "production" to api.vm.co.mz.
+    | MPESA_ENV is still accepted as a backwards compatible alias.
     |
     */
 
-    'environment' => env('MPESA_ENVIRONMENT', 'development'),
+    'environment' => env('MPESA_ENVIRONMENT', env('MPESA_ENV', 'development')),
 
     /*
     |--------------------------------------------------------------------------
@@ -50,13 +51,15 @@ return [
     | Reversal credentials
     |--------------------------------------------------------------------------
     |
-    | Only required by the reversal endpoint.
+    | Only required by the reversal endpoint. The camelCase spellings
+    | (initiatorIdentifier / securityCredential) shipped in earlier versions and
+    | are still read, so an older published config keeps working.
     |
     */
 
-    'initiatorIdentifier' => env('MPESA_INITIATOR_IDENTIFIER', ''),
+    'initiator_identifier' => env('MPESA_INITIATOR_IDENTIFIER', ''),
 
-    'securityCredential' => env('MPESA_SECURITY_CREDENTIAL', ''),
+    'security_credential' => env('MPESA_SECURITY_CREDENTIAL', ''),
 
     /*
     |--------------------------------------------------------------------------

@@ -129,6 +129,14 @@ class Transaction implements TransactionContract, Arrayable, Jsonable, JsonSeria
     }
 
     /**
+     * HTTP status that best represents the M-Pesa response code.
+     */
+    public function getStatusCode(): int
+    {
+        return Response::status($this->getResponseCode());
+    }
+
+    /**
      * The untouched payload, useful for logging and debugging.
      *
      * @return array<string, mixed>

@@ -3,8 +3,8 @@
 namespace BrilliantMind\MPesa\Tests;
 
 use BrilliantMind\MPesa\Config\Config;
+use BrilliantMind\MPesa\MPesa;
 use BrilliantMind\MPesa\Providers\MPesaServiceProvider;
-use BrilliantMind\MPesa\Request;
 use Orchestra\Testbench\TestCase as Orchestra;
 
 abstract class TestCase extends Orchestra
@@ -14,13 +14,13 @@ abstract class TestCase extends Orchestra
         parent::setUp();
 
         Config::reset();
-        Request::stopFaking();
+        MPesa::stopFaking();
     }
 
     protected function tearDown(): void
     {
         Config::reset();
-        Request::stopFaking();
+        MPesa::stopFaking();
 
         parent::tearDown();
     }
@@ -37,7 +37,10 @@ abstract class TestCase extends Orchestra
      */
     protected function getPackageAliases($app): array
     {
-        return ['MPesa' => \BrilliantMind\MPesa\Facades\MPesa::class];
+        return [
+            'MPesa' => \BrilliantMind\MPesa\Facades\MPesa::class,
+            'Mpesa' => \BrilliantMind\MPesa\Facades\MPesa::class,
+        ];
     }
 
     /**

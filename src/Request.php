@@ -12,22 +12,6 @@ use Psr\Http\Message\ResponseInterface;
 
 class Request implements MPesaContract
 {
-    /**
-     * Canned responses queued by MPesa::fake(); consumed instead of real HTTP calls.
-     *
-     * @var array<int, array{payload: array<string, mixed>, status: int}>
-     */
-    protected static array $fakeResponses = [];
-
-    protected static bool $faking = false;
-
-    /**
-     * Every request performed while faking, so tests can assert on them.
-     *
-     * @var array<int, array{operation: string, uri: string, payload: array<string, mixed>}>
-     */
-    protected static array $recorded = [];
-
     protected string $host;
 
     protected string $origin;
@@ -82,37 +66,6 @@ class Request implements MPesaContract
         $this->timeout = (float) ($options['timeout'] ?? 90.0);
         $this->connectTimeout = (float) ($options['connect_timeout'] ?? 30.0);
         $this->verifySsl = (bool) ($options['verify_ssl'] ?? true);
-    }
-
-    /**
-     * Queue a canned response; no HTTP call is performed while any fake is active.
-     *
-     * @param array<string, mixed> $payload
-     */
-    public static function fake(array $payload, int $status = 200): void
-    {
-        static::$faking = true;
-        static::$fakeResponses[] = ['payload' => $payload, 'status' => $status];
-    }
-
-    public static function stopFaking(): void
-    {
-        static::$faking = false;
-        static::$fakeResponses = [];
-        static::$recorded = [];
-    }
-
-    public static function isFaking(): bool
-    {
-        return static::$faking;
-    }
-
-    /**
-     * @return array<int, array{operation: string, uri: string, payload: array<string, mixed>}>
-     */
-    public static function recorded(): array
-    {
-        return static::$recorded;
     }
 
     /**
@@ -202,12 +155,6 @@ class Request implements MPesaContract
      */
     protected function call(string $operation, string $method, string $uri, array $data): Transaction
     {
-        if (static::$faking) {
-            static::$recorded[] = ['operation' => $operation, 'uri' => $uri, 'payload' => $data];
-
-            return $this->nextFakeTransaction();
-        }
-
         $port = $this->portFor($operation);
         $isGet = $method === 'GET';
 
@@ -275,14 +222,5 @@ class Request implements MPesaContract
         }
 
         return new Transaction($decoded, $response->getStatusCode(), $body);
-    }
-
-    protected function nextFakeTransaction(): Transaction
-    {
-        $fake = count(static::$fakeResponses) > 1
-            ? array_shift(static::$fakeResponses)
-            : (static::$fakeResponses[0] ?? ['payload' => ['output_ResponseCode' => Response::SUCCESS], 'status' => 200]);
-
-        return new Transaction($fake['payload'], $fake['status'], (string) json_encode($fake['payload']));
     }
 }

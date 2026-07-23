@@ -2,124 +2,127 @@
 
 namespace BrilliantMind\MPesa;
 
+use BadMethodCallException;
 use BrilliantMind\MPesa\Config\Config;
 use BrilliantMind\MPesa\Contracts\FakeContract;
 use BrilliantMind\MPesa\Contracts\MPesaContract;
-use BrilliantMind\MPesa\Contracts\MPesaStaticContract;
 use BrilliantMind\MPesa\Helpers\Parser;
 
-class MPesa extends Config implements MPesaStaticContract, FakeContract
+/**
+ * Entry point of the package.
+ *
+ * As operações existem em duas formas, ambas suportadas:
+ *
+ *   MPesa::c2b(...)            — estática, como na v1.x
+ *   app('mpesa')->c2b(...)     — instância, via container ou facade
+ *
+ * Por isso os métodos de transacção são `protected` e despachados por
+ * __call/__callStatic: um método público não-estático não pode ser chamado
+ * estaticamente em PHP, enquanto um protegido passa pelos métodos mágicos
+ * nos dois contextos.
+ *
+ * @method static Transaction c2b(float $amount, string $msisdn, string $transactionReference, string $thirdPartyReference)
+ * @method static Transaction b2c(float $amount, string $msisdn, string $transactionReference, string $thirdPartyReference)
+ * @method static Transaction b2b(float $amount, string $receiverPartyCode, string $transactionReference, string $thirdPartyReference)
+ * @method static Transaction transaction(string $transactionReference, string $thirdPartyReference)
+ * @method static Transaction reversal(float $amount, string $transactionID, string $thirdPartyReference)
+ * @method Transaction c2b(float $amount, string $msisdn, string $transactionReference, string $thirdPartyReference)
+ * @method Transaction b2c(float $amount, string $msisdn, string $transactionReference, string $thirdPartyReference)
+ * @method Transaction b2b(float $amount, string $receiverPartyCode, string $transactionReference, string $thirdPartyReference)
+ * @method Transaction transaction(string $transactionReference, string $thirdPartyReference)
+ * @method Transaction reversal(float $amount, string $transactionID, string $thirdPartyReference)
+ */
+class MPesa extends Config implements FakeContract
 {
     /**
-     * Queue a canned response so no HTTP call reaches the gateway.
+     * Operações despachadas pelos métodos mágicos.
      *
-     * Kept backwards compatible: fake() with no arguments returns a successful
-     * transaction; fakeWith() gives full control over the payload.
+     * @var array<int, string>
      */
-    public static function fake(int $responseCode = 200, string $status = Response::SUCCESS): void
+    protected const OPERATIONS = ['c2b', 'b2b', 'b2c', 'transaction', 'reversal'];
+
+    /**
+     * O estado de fake é estático de propósito: assim vale tanto para
+     * MPesa::fake() como para app('mpesa')->fake().
+     */
+    protected static bool $fake = false;
+
+    protected static string $fakeStatus = '';
+
+    protected static int $fakeResponseCode = 200;
+
+    /**
+     * Liga o modo fake — nenhum pedido chega à rede.
+     *
+     * $status aceita um código INS ('INS-0', 'INS-2006') ou uma descrição livre.
+     */
+    public static function fake(int $responseCode = 200, string $status = ''): void
     {
-        Request::fake([
-            'output_ResponseCode' => $status !== '' ? $status : Response::SUCCESS,
-            'output_ResponseDesc' => Response::message($status !== '' ? $status : Response::SUCCESS),
-            'output_TransactionID' => 'FAKE-TRANSACTION-ID',
-            'output_ConversationID' => 'FAKE-CONVERSATION-ID',
-            'output_ThirdPartyReference' => 'FAKE-THIRD-PARTY-REF',
-        ], $responseCode);
+        static::$fake = true;
+        static::$fakeResponseCode = $responseCode;
+        static::$fakeStatus = $status;
+
+        FakeRequest::flush();
     }
 
     /**
-     * Queue an exact payload to be returned by the next call.
+     * Devolve exactamente este payload na próxima chamada.
      *
      * @param array<string, mixed> $payload
      */
     public static function fakeWith(array $payload, int $responseCode = 200): void
     {
-        Request::fake($payload, $responseCode);
+        static::$fake = true;
+        static::$fakeResponseCode = $responseCode;
+
+        FakeRequest::queue($payload);
+    }
+
+    public static function setStatus(string $status): void
+    {
+        static::$fake = true;
+        static::$fakeStatus = $status;
+    }
+
+    public static function setResponseCode(int $code): void
+    {
+        static::$fake = true;
+        static::$fakeResponseCode = $code;
     }
 
     public static function stopFaking(): void
     {
-        Request::stopFaking();
+        static::$fake = false;
+        static::$fakeStatus = '';
+        static::$fakeResponseCode = 200;
+
+        FakeRequest::flush();
     }
 
     public static function isFaking(): bool
     {
-        return Request::isFaking();
+        return static::$fake;
     }
 
     /**
-     * Requests captured while faking.
+     * Pedidos capturados durante o modo fake, para asserções em testes.
      *
-     * @return array<int, array{operation: string, uri: string, payload: array<string, mixed>}>
+     * @return array<int, array{operation: string, payload: array<string, mixed>}>
      */
     public static function recorded(): array
     {
-        return Request::recorded();
+        return FakeRequest::recorded();
     }
 
     /**
-     * Kept for backwards compatibility with FakeContract.
-     */
-    public static function setStatus(string $status): void
-    {
-        self::fake(200, $status);
-    }
-
-    /**
-     * Kept for backwards compatibility with FakeContract.
-     */
-    public static function setResponseCode(int $code): void
-    {
-        self::fake($code);
-    }
-
-    /**
-     * Initiates a customer to business (c2b) transaction on the M-Pesa API.
-     */
-    public static function c2b(float $amount, string $msisdn, string $transactionReference, string $thirdPartyReference): Transaction
-    {
-        return static::gateway()->c2b($amount, static::normalizeMsisdn($msisdn), $transactionReference, $thirdPartyReference);
-    }
-
-    /**
-     * Initiates a business to business (b2b) transaction on the M-Pesa API.
-     *
-     * $receiverPartyCode is the shortcode of the receiving business.
-     */
-    public static function b2b(float $amount, string $receiverPartyCode, string $transactionReference, $thirdPartyReference): Transaction
-    {
-        return static::gateway()->b2b($amount, $receiverPartyCode, $transactionReference, $thirdPartyReference);
-    }
-
-    /**
-     * Initiates a business to customer (b2c) transaction on the M-Pesa API.
-     */
-    public static function b2c(float $amount, string $msisdn, string $transactionReference, $thirdPartyReference): Transaction
-    {
-        return static::gateway()->b2c($amount, static::normalizeMsisdn($msisdn), $transactionReference, $thirdPartyReference);
-    }
-
-    /**
-     * Query the current status of a transaction.
-     */
-    public static function transaction(string $transactionReference, string $thirdPartyReference): Transaction
-    {
-        return static::gateway()->transaction($transactionReference, $thirdPartyReference);
-    }
-
-    /**
-     * Initiates a reversal transaction on the M-Pesa API.
-     */
-    public static function reversal(float $amount, string $transactionID, string $thirdPartyReference): Transaction
-    {
-        return static::gateway()->reversal($amount, $transactionID, $thirdPartyReference);
-    }
-
-    /**
-     * Build a ready to use gateway client from the current configuration.
+     * Constrói o cliente pronto a usar a partir da configuração actual.
      */
     public static function gateway(): MPesaContract
     {
+        if (static::$fake) {
+            return new FakeRequest(static::$fakeResponseCode, static::$fakeStatus);
+        }
+
         static::ensureConfigured();
 
         return new Request(
@@ -140,8 +143,8 @@ class MPesa extends Config implements MPesaStaticContract, FakeContract
     }
 
     /**
-     * Accept the phone number the way people actually type it and hand M-Pesa
-     * the 258XXXXXXXXX format it expects.
+     * Aceita o número como as pessoas o escrevem e entrega à M-Pesa
+     * o formato 258XXXXXXXXX que ela espera.
      */
     public static function normalizeMsisdn(string $msisdn): string
     {
@@ -165,11 +168,67 @@ class MPesa extends Config implements MPesaStaticContract, FakeContract
         return $digits;
     }
 
-    /**
-     * @deprecated Use gateway() instead.
-     */
-    protected function mPesa(): MPesaContract
+    public function __call(string $method, array $arguments)
     {
-        return static::gateway();
+        return $this->dispatch($method, $arguments);
+    }
+
+    public static function __callStatic(string $method, array $arguments)
+    {
+        return (new static())->dispatch($method, $arguments);
+    }
+
+    /**
+     * Cliente paga à empresa. A M-Pesa envia um USSD Push para confirmar o PIN.
+     */
+    protected function c2b(float $amount, string $msisdn, string $transactionReference, string $thirdPartyReference): Transaction
+    {
+        return static::gateway()->c2b($amount, static::normalizeMsisdn($msisdn), $transactionReference, $thirdPartyReference);
+    }
+
+    /**
+     * Empresa paga a outra empresa. $receiverPartyCode é o shortcode de quem recebe.
+     */
+    protected function b2b(float $amount, string $receiverPartyCode, string $transactionReference, string $thirdPartyReference): Transaction
+    {
+        return static::gateway()->b2b($amount, $receiverPartyCode, $transactionReference, $thirdPartyReference);
+    }
+
+    /**
+     * Empresa paga ao cliente.
+     */
+    protected function b2c(float $amount, string $msisdn, string $transactionReference, string $thirdPartyReference): Transaction
+    {
+        return static::gateway()->b2c($amount, static::normalizeMsisdn($msisdn), $transactionReference, $thirdPartyReference);
+    }
+
+    /**
+     * Consulta o estado actual de uma transacção.
+     */
+    protected function transaction(string $transactionReference, string $thirdPartyReference): Transaction
+    {
+        return static::gateway()->transaction($transactionReference, $thirdPartyReference);
+    }
+
+    /**
+     * Reverte uma transacção bem sucedida.
+     */
+    protected function reversal(float $amount, string $transactionID, string $thirdPartyReference): Transaction
+    {
+        return static::gateway()->reversal($amount, $transactionID, $thirdPartyReference);
+    }
+
+    /**
+     * @param array<int, mixed> $arguments
+     */
+    protected function dispatch(string $method, array $arguments): Transaction
+    {
+        if (! in_array($method, static::OPERATIONS, true)) {
+            throw new BadMethodCallException(
+                sprintf('Method %s::%s() does not exist.', static::class, $method)
+            );
+        }
+
+        return $this->{$method}(...$arguments);
     }
 }

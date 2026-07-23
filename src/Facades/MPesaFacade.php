@@ -3,10 +3,10 @@
 namespace BrilliantMind\MPesa\Facades;
 
 /**
- * Backwards compatible alias for {@see MPesa}.
+ * Alias retrocompatível de {@see MPesa}.
  *
- * The namespace of this file used to be BrilliantMind\MPesa, which broke PSR-4
- * autoloading and made the facade impossible to resolve.
+ * O namespace deste ficheiro era BrilliantMind\MPesa, o que violava a PSR-4 e
+ * tornava a facade impossível de resolver.
  */
 class MPesaFacade extends MPesa
 {

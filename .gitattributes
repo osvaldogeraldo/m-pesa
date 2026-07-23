@@ -1,0 +1,9 @@
+* text=auto eol=lf
+
+# Ficheiros de desenvolvimento: ficam no repositório mas não vão no dist do Composer.
+/.claude          export-ignore
+/.gitattributes   export-ignore
+/.gitignore       export-ignore
+/tests            export-ignore
+/phpunit.xml.dist export-ignore
+/teste.php        export-ignore

@@ -32,26 +32,32 @@ class TransactionsTest extends TestCase
         [$request] = MPesa::recorded();
         $this->assertSame('c2b', $request['operation']);
         $this->assertSame('258841234567', $request['payload']['input_CustomerMSISDN']);
-        $this->assertSame('171717', $request['payload']['input_ServiceProviderCode']);
-    }
-
-    public function test_it_works_through_the_facade(): void
-    {
-        $this->configureCredentials();
-        MPesaFacade::fake();
-
-        $this->assertTrue(MPesaFacade::c2b(10.0, '841234567', 'REF', 'TPR')->isSuccessful());
+        $this->assertSame('REF123', $request['payload']['input_TransactionReference']);
     }
 
     /**
-     * The alias composer discovery registers, so \MPesa works with no imports.
+     * A API estática da v1.x e a de instância do container têm de coexistir.
      */
-    public function test_it_works_through_the_global_alias(): void
+    public function test_it_works_statically_through_the_facade_and_through_the_container(): void
+    {
+        $this->configureCredentials();
+        MPesa::fake();
+
+        $this->assertTrue(MPesa::c2b(10.0, '841234567', 'REF', 'TPR')->isSuccessful());
+        $this->assertTrue(MPesaFacade::c2b(10.0, '841234567', 'REF', 'TPR')->isSuccessful());
+        $this->assertTrue($this->app->make('mpesa')->c2b(10.0, '841234567', 'REF', 'TPR')->isSuccessful());
+    }
+
+    /**
+     * Ambos os aliases registados pelo package discovery.
+     */
+    public function test_it_works_through_both_global_aliases(): void
     {
         $this->configureCredentials();
         \MPesa::fake();
 
         $this->assertTrue(\MPesa::c2b(10.0, '841234567', 'REF', 'TPR')->isSuccessful());
+        $this->assertTrue(\Mpesa::c2b(10.0, '841234567', 'REF', 'TPR')->isSuccessful());
     }
 
     public function test_it_reports_a_failed_transaction_instead_of_throwing(): void
@@ -66,6 +72,17 @@ class TransactionsTest extends TestCase
         $this->assertSame('INS-5', $transaction->getResponseCode());
         $this->assertSame('Transaction cancelled by customer', $transaction->getMessage());
         $this->assertSame(422, $transaction->getHttpStatus());
+    }
+
+    public function test_fake_with_returns_the_exact_payload(): void
+    {
+        $this->configureCredentials();
+        MPesa::fakeWith([
+            'output_ResponseCode' => 'INS-0',
+            'output_TransactionID' => '49XCDF6',
+        ]);
+
+        $this->assertSame('49XCDF6', MPesa::c2b(10.0, '841234567', 'REF', 'TPR')->getTransactionID());
     }
 
     public function test_each_operation_hits_its_own_endpoint(): void
@@ -93,5 +110,12 @@ class TransactionsTest extends TestCase
         $this->expectExceptionMessage('MPESA_API_KEY');
 
         MPesa::c2b(10.0, '841234567', 'REF', 'TPR');
+    }
+
+    public function test_an_unknown_method_raises_a_normal_bad_method_call(): void
+    {
+        $this->expectException(\BadMethodCallException::class);
+
+        MPesa::thisDoesNotExist();
     }
 }

@@ -2,7 +2,9 @@
 
 namespace BrilliantMind\MPesa\Providers;
 
+use BrilliantMind\MPesa\Facades\MPesa as MPesaFacade;
 use BrilliantMind\MPesa\MPesa;
+use Illuminate\Foundation\AliasLoader;
 use Illuminate\Support\ServiceProvider;
 
 class MPesaServiceProvider extends ServiceProvider
@@ -17,6 +19,8 @@ class MPesaServiceProvider extends ServiceProvider
 
         $this->app->singleton('mpesa', fn () => new MPesa());
         $this->app->alias('mpesa', MPesa::class);
+
+        $this->registerAliases();
     }
 
     /**
@@ -35,5 +39,25 @@ class MPesaServiceProvider extends ServiceProvider
         // Credentials are read lazily on the first transaction (see Config::hydrateIfNeeded),
         // which keeps the package working with config:cache, queue workers and Octane.
         // Nothing else needs to happen here.
+    }
+
+    /**
+     * Both spellings have shipped in the wild, so both keep working.
+     * Composer package discovery already registers "MPesa"; this covers apps
+     * that register the provider by hand and the older "Mpesa" alias.
+     */
+    protected function registerAliases(): void
+    {
+        if (! class_exists(AliasLoader::class)) {
+            return;
+        }
+
+        $loader = AliasLoader::getInstance();
+
+        foreach (['MPesa', 'Mpesa'] as $alias) {
+            if (! class_exists($alias, false)) {
+                $loader->alias($alias, MPesaFacade::class);
+            }
+        }
     }
 }

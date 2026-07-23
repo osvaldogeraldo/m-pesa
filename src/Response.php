@@ -51,6 +51,20 @@ abstract class Response
     ];
 
     /**
+     * Full entry for a response code, with a safe fallback for unknown ones.
+     *
+     * @return array{code: int, message: string}
+     */
+    public static function describe(?string $responseCode): array
+    {
+        if ($responseCode === null || $responseCode === '') {
+            return ['code' => 0, 'message' => 'Unknown response from the M-Pesa gateway'];
+        }
+
+        return self::$codes[$responseCode] ?? ['code' => 0, 'message' => "Unknown response code ({$responseCode})"];
+    }
+
+    /**
      * Human readable description for a response code.
      */
     public static function message(?string $responseCode): string
