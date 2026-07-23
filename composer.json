@@ -46,11 +46,19 @@
     "test": "vendor/bin/phpunit",
     "test-coverage": "vendor/bin/phpunit --coverage-html coverage"
   },
+  "config": {
+    "sort-packages": true
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true,
   "extra": {
     "laravel": {
       "providers": [
         "BrilliantMind\\MPesa\\Providers\\MPesaServiceProvider"
-      ]
+      ],
+      "aliases": {
+        "MPesa": "BrilliantMind\\MPesa\\Facades\\MPesa"
+      }
     }
   }
 }

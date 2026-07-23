@@ -2,58 +2,38 @@
 
 namespace BrilliantMind\MPesa\Providers;
 
-use BrilliantMind\MPesa\Config\Config;
 use BrilliantMind\MPesa\MPesa;
 use Illuminate\Support\ServiceProvider;
 
 class MPesaServiceProvider extends ServiceProvider
 {
     /**
-     * Bootstrap the application services.
-     *
-     * @return void
+     * Register the package services.
      */
-    public function boot()
+    public function register(): void
     {
-        // Publish the config file if running in console (for Laravel artisan)
-        // if ($this->app->runningInConsole()) {
-        //     $this->publishes([
-        //         __DIR__ . '/../../config/mpesa.php' => config_path('mpesa.php'),
-        //     ], 'config');
-        // }
+        // Defaults live inside the package, so the app works without publishing anything.
+        $this->mergeConfigFrom(__DIR__ . '/../../config/mpesa.php', 'mpesa');
 
-        Config::config(
-            config('mpesa.api_key'),
-            config('mpesa.public_key'),
-            config('mpesa.environment', 'development'), // development ou production
-            config('mpesa.service_provider_code', '171717'),
-            config('mpesa.origin', 'developer.mpesa.vm.co.mz'),
-            config('mpesa.initiatorIdentifier', ''),
-            config('mpesa.securityCredential', ''),
-            config('mpesa.host', ''),
-            config('mpesa.port', '')
-        );
-
-        $this->publishes([
-            __DIR__.'/../../config/mpesa.php' => config_path('mpesa.php'),
-        ]);
+        $this->app->singleton('mpesa', fn () => new MPesa());
+        $this->app->alias('mpesa', MPesa::class);
     }
 
     /**
-     * Register the application services.
-     *
-     * @return void
+     * Bootstrap the package services.
      */
-    public function register()
+    public function boot(): void
     {
-        // Merge the package configuration with the app's configuration
-        $this->mergeConfigFrom(
-            __DIR__ . '/../../config/mpesa.php', 'mpesa'
-        );
+        if ($this->app->runningInConsole()) {
+            $config = [__DIR__ . '/../../config/mpesa.php' => config_path('mpesa.php')];
 
-        // Register the MPesa class with the application
-        $this->app->singleton('mpesa', function () {
-            return new MPesa();
-        });
+            // Publishing is optional; both tags point at the same file.
+            $this->publishes($config, 'mpesa-config');
+            $this->publishes($config, 'config');
+        }
+
+        // Credentials are read lazily on the first transaction (see Config::hydrateIfNeeded),
+        // which keeps the package working with config:cache, queue workers and Octane.
+        // Nothing else needs to happen here.
     }
 }

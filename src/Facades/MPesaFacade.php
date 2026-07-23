@@ -1,18 +1,13 @@
 <?php
 
-namespace BrilliantMind\MPesa;
+namespace BrilliantMind\MPesa\Facades;
 
-use Illuminate\Support\Facades\Facade;
-
-class MPesaFacade extends Facade
+/**
+ * Backwards compatible alias for {@see MPesa}.
+ *
+ * The namespace of this file used to be BrilliantMind\MPesa, which broke PSR-4
+ * autoloading and made the facade impossible to resolve.
+ */
+class MPesaFacade extends MPesa
 {
-    /**
-     * Get the registered name of the component.
-     *
-     * @return string
-     */
-    protected static function getFacadeAccessor()
-    {
-        return 'mpesa';
-    }
 }

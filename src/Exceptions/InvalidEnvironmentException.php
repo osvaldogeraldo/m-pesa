@@ -2,8 +2,13 @@
 
 namespace BrilliantMind\MPesa\Exceptions;
 
-use Exception;
-
-class InvalidEnvironmentException extends Exception
+class InvalidEnvironmentException extends MPesaException
 {
+    public static function for(string $environment): self
+    {
+        return new self(
+            "\"{$environment}\" is not a valid M-Pesa environment. " .
+            'Use "development" (sandbox) or "production" in MPESA_ENVIRONMENT.'
+        );
+    }
 }
